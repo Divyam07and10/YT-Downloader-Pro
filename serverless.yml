@@ -1,0 +1,45 @@
+service: youtube-downloader
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: python3.11
+  region: us-east-1
+  environment:
+    S3_BUCKET: ${env:S3_BUCKET, 'my-youtube-videos'}
+    DB_HOST: ${env:DB_HOST}
+    DB_PORT: ${env:DB_PORT, '5432'}
+    DB_NAME: ${env:DB_NAME, 'youtube'}
+    DB_USER: ${env:DB_USER}
+    DB_PASSWORD: ${env:DB_PASSWORD}
+    REDIS_URL: ${env:REDIS_URL, 'redis://localhost:6379/0'}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:GetObject
+          Resource: "arn:aws:s3:::${env:S3_BUCKET}/*"
+
+functions:
+  download:
+    handler: app.main.handler
+    events:
+      - httpApi:
+          path: /download
+          method: post
+    timeout: 600
+    memorySize: 6144
+    layers:
+      - arn:aws:lambda:us-east-1:YOUR_ACCOUNT_ID:layer:ffmpeg-layer:1
+
+package:
+  patterns:
+    - '!**/*'
+    - app/**
+    - requirements.txt
+
+plugins:
+  - serverless-python-requirements

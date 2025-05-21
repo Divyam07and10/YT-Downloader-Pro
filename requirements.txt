@@ -1,0 +1,14 @@
+fastapi[all]
+uvicorn
+yt-dlp
+boto3
+moto
+sqlalchemy
+psycopg2-binary
+python-dotenv
+celery
+redis
+asyncpg
+pydantic
+alembic
+pytube
